@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AMPD Faculty Stipend Request Form</title>
+  <style>
+    @page {
+      size: letter portrait;
+      margin: 0.25in;
+    }
+
+    @media print {
+      body {
+        margin: 0.25in;
+        font-size: 10pt;
+      }
+      textarea, input {
+        font-size: 10pt;
+      }
+      button {
+        display: none;
+      }
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+    }
+    textarea, input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 6px;
+      margin-top: 3px;
+      box-sizing: border-box;
+    }
+    input[type="date"] {
+      width: 200px;
+      padding: 6px;
+      margin-top: 3px;
+      box-sizing: border-box;
+    }
+    textarea {
+      height: 80px;
+    }
+    .signature-date {
+      display: flex;
+      gap: 20px;
+    }
+    .signature-date div {
+      flex: 1;
+    }
+    button {
+      margin-top: 20px;
+      padding: 8px 16px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .header img {
+      height: 120px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <img src="https://www.saddleback.edu/sites/default/files/site-wrapper/logo/saddleback_logo.svg" alt="Saddleback College Logo">
+    <h1>AMPD Faculty Stipend Request Form</h1>
+  </div>
+
+  <p><em>Stipends are <strong>only</strong> for faculty. Please complete and submit to your Dean for Approval.</em></p>
+
+  <form id="stipend-form">
+
+    <label for="today-date">Today’s Date</label>
+    <input type="date" id="today-date" name="today-date" required>
+
+    <label for="recipient">Faculty Stipend Recipient</label>
+    <input type="text" id="recipient" name="recipient" required>
+
+    <label for="department">Department</label>
+    <input type="text" id="department" name="department" required>
+
+    <label for="amount">Anticipated Stipend Amount</label>
+    <input type="text" id="amount" name="amount" required>
+
+    <label for="start-date">Start Date</label>
+    <input type="date" id="start-date" name="start-date" required>
+
+    <label for="end-date">End Date</label>
+    <input type="date" id="end-date" name="end-date" required>
+
+    <label for="funding-source">Requested Funding Source – Foundation / General Fund / FS110</label>
+    <input type="text" id="funding-source" name="funding-source" required>
+
+    <label for="hours">Approximate # of Hours</label>
+    <input type="text" id="hours" name="hours" required>
+
+    <div class="signature-date">
+      <div>
+        <label for="faculty-signature">Faculty Requestor</label>
+        <input type="text" id="faculty-signature" name="faculty-signature" required>
+      </div>
+	  <div>
+        <label for="faculty-email">Faculty Email</label>
+        <input type="text" id="faculty-email" name="faculty-email" required>
+      </div>
+      <div>
+        <label for="signature-date">Date</label>
+        <input type="date" id="signature-date" name="signature-date" required>
+      </div>
+    </div>
+
+    <label for="justification">Justification of Work to be Performed</label>
+    <textarea id="justification" name="justification" required></textarea>
+
+    <label for="deliverables">Deliverables / Outcomes</label>
+    <textarea id="deliverables" name="deliverables" required></textarea>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <script>
+    document.getElementById('stipend-form').addEventListener('submit', async function (event) {
+      event.preventDefault();
+
+      // Disable the submit button
+      document.querySelector('button[type="submit"]').disabled = true;
+
+      // Trigger print and wait for it to finish
+      await new Promise(resolve => {
+        window.onafterprint = resolve;
+        window.print();
+      });
+
+      const data = {
+        todayDate: document.getElementById('today-date').value,
+        recipient: document.getElementById('recipient').value,
+        department: document.getElementById('department').value,
+        amount: document.getElementById('amount').value,
+        startDate: document.getElementById('start-date').value,
+        endDate: document.getElementById('end-date').value,
+        fundingSource: document.getElementById('funding-source').value,
+        hours: document.getElementById('hours').value,
+        facultySignature: document.getElementById('faculty-signature').value,
+		facultyEmail: document.getElementById('faculty-email').value,
+        signatureDate: document.getElementById('signature-date').value,
+        justification: document.getElementById('justification').value,
+        deliverables: document.getElementById('deliverables').value
+      };
+
+      try {
+        const response = await fetch("https://prod-102.westus.logic.azure.com:443/workflows/d2986e575b6a4efa99a425f85fdf1efb/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ekDUJl-wsV4s45azCME5KNSRRmqlStNh2vCzDMpNMjI", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+          alert("Form submitted successfully.");
+        } else {
+          alert("There was an error submitting the form.");
+        }
+      } catch (error) {
+        alert("An error occurred while submitting the form.");
+        console.error(error);
+      } finally {
+        document.querySelector('button[type="submit"]').disabled = false;
+      }
+    });
+  </script>
+
+</body>
+</html>
